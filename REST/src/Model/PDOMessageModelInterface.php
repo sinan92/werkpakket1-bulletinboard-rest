@@ -212,4 +212,35 @@ WHERE id = ?");
         $token = substr(base_convert(sha1(uniqid(mt_rand())), 16, 36), 0, 10);
         return $token;
     }
+
+    public function postMessage($content, $category)
+    {
+        $statement = $this->connection->getPDO()->prepare("INSERT INTO messages (content, category) 
+        VALUES (?, ?)");
+        $statement->bindValue(1, $content, \PDO::PARAM_STR);
+        $statement->bindValue(2, $category, \PDO::PARAM_STR);
+        $statement->execute();
+        return "Message has been created";
+    }
+
+    public function updateMessage($messageId, $content, $category)
+    {
+        $statement = $this->connection->getPDO()->prepare("UPDATE messages SET content = ?, category = ?
+WHERE id = ?");
+        $statement->bindValue(1, $content, \PDO::PARAM_STR);
+        $statement->bindValue(2, $category, \PDO::PARAM_STR);
+        $statement->bindValue(3, $messageId, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return "Message has been updated";
+    }
+
+    public function deleteMessage($messageId)
+    {
+        $statement = $this->connection->getPDO()->prepare("DELETE FROM messages WHERE id = ?");
+        $statement->bindValue(1, $messageId, \PDO::PARAM_INT);
+        $statement->execute();
+
+        return "Message has been deleted";
+    }
 }

@@ -14,4 +14,7 @@ interface MessageModelInterface
     public function postComment($messageId, $comment);
     public function upVoteMessage($messageId);
     public function downVoteMessage($messageId);
+    public function postMessage($content, $category);
+    public function updateMessage($messageId, $content, $category);
+    public function deleteMessage($messageId);
 }

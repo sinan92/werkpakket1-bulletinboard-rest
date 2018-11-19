@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Alfheim\Sanitizer\Sanitizer;
 
 class MessageController extends Controller
 {
@@ -189,6 +190,74 @@ class MessageController extends Controller
         $response = null;
         try {
             $response = $this->messageModel->downVoteMessage($messageId);
+        } catch (\IllegalArgumentExceptions $exception) {
+            $statuscode = 500;
+        }
+        return new JsonResponse($response, $statuscode);
+    }
+
+
+    /**
+     * @Route("/messages/create", methods={"POST"}, name="postMessage")
+     */
+    public function postMessage(Request $request)
+    {
+        $input['content'] = $request->request->get("content");
+        $input['category'] = $request->request->get("category");
+
+        $sanitizer = Sanitizer::make([
+            'content'     => 'trim|strip_tags',
+            'category'     => 'trim|strip_tags'
+        ]);
+
+        $sanitized = $sanitizer->sanitize($input);
+
+        $statuscode = 201;
+        $response = null;
+        try {
+            $response = $this->messageModel->postMessage($sanitized['content'], $sanitized['category']);
+        } catch (\IllegalArgumentExceptions $exception) {
+            $statuscode = 500;
+        }
+        return new JsonResponse($response, $statuscode);
+    }
+
+
+    /**
+     * @Route("/messages/edit/{messageId}", methods={"PUT"}, name="updateMessage")
+     */
+    public function updateMessage($messageId, Request $request)
+    {
+        $input['content'] = $request->request->get("content");
+        $input['category'] = $request->request->get("category");
+
+        $sanitizer = Sanitizer::make([
+            'content'     => 'trim|strip_tags',
+            'category'     => 'trim|strip_tags'
+        ]);
+
+        $sanitized = $sanitizer->sanitize($input);
+
+        $statuscode = 200;
+        $response = null;
+        try {
+            $response = $this->messageModel->updateMessage($messageId, $sanitized['content'], $sanitized['category']);
+        } catch (\IllegalArgumentExceptions $exception) {
+            $statuscode = 500;
+        }
+        return new JsonResponse($response, $statuscode);
+    }
+
+
+    /**
+     * @Route("/messages/delete/{messageId}", methods={"DELETE"}, name="deleteMessage")
+     */
+    public function deleteMessage($messageId)
+    {
+        $statuscode = 200;
+        $response = null;
+        try {
+            $response = $this->messageModel->deleteMessage($messageId);
         } catch (\IllegalArgumentExceptions $exception) {
             $statuscode = 500;
         }
